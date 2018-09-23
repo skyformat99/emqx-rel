@@ -9,10 +9,10 @@ DEPS += emqx emqx_retainer emqx_recon emqx_reloader emqx_dashboard emqx_manageme
 		emqx_auth_clientid emqx_auth_username emqx_auth_ldap emqx_auth_http \
         emqx_auth_mysql emqx_auth_pgsql emqx_auth_redis emqx_auth_mongo \
         emqx_sn emqx_coap emqx_lwm2m emqx_stomp emqx_plugin_template emqx_web_hook \
-        emqx_auth_jwt emqx_statsd emqx_delayed_publish
+        emqx_auth_jwt emqx_statsd emqx_delayed_publish emqx_lua_hook
 
 # emqx and plugins
-dep_emqx            = git https://github.com/emqtt/emqttd emqx30
+dep_emqx            = git https://github.com/emqx/emqx emqx30
 dep_emqx_retainer   = git https://github.com/emqx/emqx-retainer emqx30
 dep_emqx_recon      = git https://github.com/emqx/emqx-recon emqx30
 dep_emqx_reloader   = git https://github.com/emqx/emqx-reloader emqx30
@@ -41,11 +41,20 @@ dep_emqx_stomp = git https://github.com/emqx/emqx-stomp emqx30
 # plugin template
 dep_emqx_plugin_template = git https://github.com/emqx/emq-plugin-template emqx30
 
-# web_hook lua_hook
-dep_emqx_web_hook  = git https://github.com/emqx/emq-web-hook emqx30
+# web_hook
+dep_emqx_web_hook  = git https://github.com/emqx/emqx-web-hook emqx30
+dep_emqx_lua_hook  = git https://github.com/emqx/emqx-lua-hook emqx30
+
+# Add this dependency before including erlang.mk
+all:: OTP_21_OR_NEWER
 
 # COVER = true
 include erlang.mk
+
+# Fail fast in case older than OTP 21
+.PHONY: OTP_21_OR_NEWER
+OTP_21_OR_NEWER:
+	@erl -noshell -eval "R = list_to_integer(erlang:system_info(otp_release)), halt(if R >= 21 -> 0; true -> 1 end)"
 
 # Compile options
 ERLC_OPTS += +warn_export_all +warn_missing_spec +warn_untyped_record
